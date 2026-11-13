@@ -4,6 +4,7 @@ const HANDOFF = '# Handoff: Build the refresh mod\n\nContinue work in `~/vault`.
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`offer at 250k, steps, then copy and start (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     let tokens = 120_000
     const files: Record<string, string> = {}
     const store: Record<string, unknown> = {}
@@ -103,8 +104,9 @@ for (const surface of ['desktop', 'terminal'] as const) {
     expect(forkPrompt, 'tmp paths dropped').not.toContain('/tmp/x')
 
     await v.press({ key: 'copy' })
-    const copied = runs.find(r => r.argv[0] === 'pbcopy')
-    expect(copied?.stdin ?? '', 'copy sends the handoff to pbcopy').toContain('# Handoff: Build the refresh mod')
+    const copied = runs.find(r => r.argv.join(' ').includes('xclip -selection clipboard'))
+    expect(copied?.stdin ?? '', 'copy sends the handoff to xclip').toContain('# Handoff: Build the refresh mod')
+    expect(runs.some(r => r.argv[0] === 'pbcopy'), 'pbcopy not needed once xclip worked').toBe(false)
 
     await v.press({ key: 'start' })
     await clock.advance(2_000)
@@ -123,6 +125,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`Cache Clock request runs it; a failed model step keeps the draft and logs (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     // Cache Clock left a request file for this chat.
     let requested = true
     const files: Record<string, string> = {}
@@ -174,6 +177,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`draws nothing of its own when switched off in /mods (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     let switches = ''
     const isSwitches = (e: unknown) => (e as { path: string }).path.endsWith('/.claude/mods/switches.json')
     on('session.start', async ($, e) => ({ cwd: e.cwd }) as never)
@@ -259,6 +263,7 @@ const begin = { source: 'startup', cwd: '/Users/test/vault', isInteractive: true
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`Hide on the offer writes the shared flag and it stays away (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const tokens = { value: 262_000 }
     const { clock, toasts } = rig(on, files, tokens)
@@ -285,6 +290,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`clearing the flag brings the offer back; Show and /refresh open it at any size (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = { [SW]: JSON.stringify({ 'handoff:hidden': true }) }
     const tokens = { value: 262_000 }
     const { clock } = rig(on, files, tokens)

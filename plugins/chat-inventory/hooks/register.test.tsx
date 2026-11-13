@@ -71,6 +71,7 @@ const paneProps = { title: 'In this chat', isFocused: false, bodyColumns: 48, pl
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`lists connectors, files and skills in the pane (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const opened: string[] = []
     const clock = setup(on, {}, opened, [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -106,6 +107,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`a gws Bash call is a CLI connector; a SKILL.md read is a skill (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const clock = setup(on, {}, [], [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await clock.settle()
@@ -126,6 +129,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`pressing a connector shows its calls; pressing again hides them (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const clock = setup(on, {}, [], [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await clock.settle()
@@ -150,6 +155,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`switched off in switches.json, the pane draws nothing of its own (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = { '~/.claude/mods/switches.json': JSON.stringify({ 'chat-inventory': false }) }
     const opened: string[] = []
     const runs: string[][] = []
@@ -179,6 +186,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`connectors are named from the server name or the tool names, never a raw id (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const clock = setup(on, {}, [], [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await clock.settle()
@@ -211,6 +219,7 @@ const SW = '~/.claude/mods/switches.json'
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`Hide writes the shared flag, closes the pane and stops auto-open (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const opened: string[] = []
     const clock = setup(on, files, opened, [])
@@ -229,6 +238,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`clearing the flag lets Show open the pane again (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = { [SW]: JSON.stringify({ 'chat-inventory:hidden': true }) }
     const opened: string[] = []
     const clock = setup(on, files, opened, [])
@@ -255,6 +266,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`a section header arrow closes and opens it (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const clock = setup(on, {}, [], [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await clock.settle()
@@ -279,6 +291,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`context files show 10 rows at a time with Up and Down (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const clock = setup(on, {}, [], [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await clock.settle()
@@ -309,6 +323,7 @@ const PLAN_FILE = '~/.claude/mods-state/plan-sid.json'
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`a TodoWrite call draws three to-do rows with the right marks (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const opened: string[] = []
     const clock = setup(on, {}, opened, [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -342,6 +357,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`a plan file on disk is drawn and long steps wrap (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const long = 'Pull every Stripe charge for the last thirty days and match each one to a Circle member by email'
     const files: Record<string, string> = {
       [PLAN_FILE]: JSON.stringify({
@@ -371,6 +388,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`no plan shows one dim line; context files count the files read (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const clock = setup(on, {}, [], [])
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await clock.settle()

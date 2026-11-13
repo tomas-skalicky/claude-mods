@@ -64,6 +64,14 @@ const NOT_ARGS = new Set(['tool', 'tool_use_id', 'agentId', 'hook_event_name', '
 
 // Module variables reset on a reload; the lists live in $.state.
 let home = ''
+
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
 let seq = 0
 let autoOpened = false
 let off = false
@@ -600,7 +608,7 @@ const KNOWN_KEYS = [...new Set([...Object.keys(LOGOS), ...[...CONNECTOR_NAMES, .
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    home = $.plugin.root.split('/.claude/')[0] ?? ''
+    await homeDir($)
     await $.command.register({ name: 'inventory', description: 'Show the connectors, files and skills this chat used', immediate: true })
     await readSwitch($)
     if (!switchTimer)

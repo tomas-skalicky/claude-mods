@@ -34,6 +34,14 @@ const HINTS = [
 
 // Module variables reset on a reload; the band lives in $.state.
 let home = ''
+
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
 // The rules_folder option from the config menu; empty means ask once and remember.
 let configured = ''
 let enabled = true
@@ -50,7 +58,7 @@ let off = false
 async function readSwitch($: EngineInterface) {
   let now = false
   try {
-    const path = `${$.plugin.root.split('/.claude/')[0] ?? ''}/.claude/mods/switches.json`
+    const path = `${await homeDir($)}/.claude/mods/switches.json`
     if (await $.fs.exists(path)) {
       const json = JSON.parse(String(await $.fs.read(path))) as Record<string, unknown>
       now = json[NAME] === false
@@ -329,7 +337,7 @@ async function fail($: EngineInterface, b: Band, what: string, err: unknown) {
 export const register: Register = (on, options) => {
   configured = typeof options.rules_folder === 'string' ? options.rules_folder : ''
   on('session.start', async ($, e, next) => {
-    home = $.plugin.root.split('/.claude/')[0] ?? ''
+    await homeDir($)
     await $.command.register({ name: 'reflect', description: 'Turn reflect on or off. /reflect folder forgets the remembered rules folder', argumentHint: '[folder]' })
     const saved = await $.store.get('enabled')
     enabled = saved !== false

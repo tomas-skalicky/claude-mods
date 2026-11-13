@@ -103,6 +103,7 @@ const props = { isWorking: false, hasSurvey: false } as never
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`a correction shows the band, Save everywhere keeps CLAUDE.md content (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const w = world()
     mockAll(on, w)
     const clock = mock.clock(on, { now: Date.UTC(2026, 9, 15, 12) })
@@ -143,6 +144,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`rules_folder unset: Save to vault asks once, remembers, and writes the rule file (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const w = world()
     mockAll(on, w)
     const clock = mock.clock(on, { now: Date.UTC(2026, 9, 15, 12) })
@@ -187,6 +190,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`rules_folder unset: cancelling the folder dialog saves nothing (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const w = world()
     mockAll(on, w)
     const clock = mock.clock(on, { now: Date.UTC(2026, 9, 15, 12) })
@@ -205,6 +210,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`rules_folder set: Save to vault writes there without asking (${surface})`, { timeoutMs: 30000, options: { rules_folder: '/Users/test/my-rules' } }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const w = world()
     mockAll(on, w)
     const clock = mock.clock(on, { now: Date.UTC(2026, 9, 15, 12) })
@@ -225,6 +232,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`a normal prompt shows no band (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const w = world()
     mockAll(on, w)
     const clock = mock.clock(on, { now: Date.UTC(2026, 9, 15, 12) })
@@ -243,6 +252,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`draws nothing of its own when switched off in /mods (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const w = world()
     mockAll(on, w)
     const clock = mock.clock(on, { now: Date.UTC(2026, 9, 15, 12) })

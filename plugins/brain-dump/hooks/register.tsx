@@ -66,6 +66,14 @@ export type QA = { q: string; a: string | null }
 
 let home = ''
 
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
+
 // The /mods switchboard turns this mod off in every chat with switches.json.
 const NAME = 'brain-dump'
 let off = false
@@ -73,7 +81,7 @@ let off = false
 async function readSwitch($: EngineInterface) {
   let now = false
   try {
-    const path = `${$.plugin.root.split('/.claude/')[0] ?? ''}/.claude/mods/switches.json`
+    const path = `${await homeDir($)}/.claude/mods/switches.json`
     if (await $.fs.exists(path)) {
       const json = JSON.parse(String(await $.fs.read(path))) as Record<string, unknown>
       now = json[NAME] === false
@@ -251,7 +259,7 @@ async function shape($: EngineInterface, dump: string, qa: QA[]): Promise<string
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     const result = await next(e)
-    home = $.plugin.root.split('/.claude/')[0] ?? ''
+    await homeDir($)
     await $.command.register({ name: CMD, description: 'Turn brain dump shaping on or off' })
     await $.state.set(ENABLED, await isOn($))
     await readSwitch($).catch(() => undefined)

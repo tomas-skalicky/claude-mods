@@ -34,6 +34,14 @@ const COLD = '#2563eb'
 // Module variables reset on a reload; the clock itself lives in $.state.
 let sid = ''
 let home = ''
+
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
 let demo = false
 let detected: 'unknown' | '5m' | '1h' = 'unknown'
 let working = false
@@ -46,10 +54,10 @@ const HIDE_KEY = `${NAME}:hidden`
 let off = false
 let hidden = false
 
-const switchesPath = ($: EngineInterface) => `${$.plugin.root.split('/.claude/')[0] ?? ''}/.claude/mods/switches.json`
+const switchesPath = async ($: EngineInterface) => `${await homeDir($)}/.claude/mods/switches.json`
 
 async function readSwitches($: EngineInterface): Promise<Record<string, unknown>> {
-  const path = switchesPath($)
+  const path = (await switchesPath($))
   if (!(await $.fs.exists(path))) return {}
   const json = JSON.parse(String(await $.fs.read(path))) as unknown
   return json && typeof json === 'object' && !Array.isArray(json) ? (json as Record<string, unknown>) : {}
@@ -90,7 +98,7 @@ async function setHidden($: EngineInterface, value: boolean) {
     if (value) json[HIDE_KEY] = true
     else delete json[HIDE_KEY]
     await $.process.run(['mkdir', '-p', `${home}/.claude/mods`])
-    await $.fs.write(switchesPath($), `${JSON.stringify(json, null, 2)}\n`)
+    await $.fs.write((await switchesPath($)), `${JSON.stringify(json, null, 2)}\n`)
   } catch (err) {
     await log($, `save hidden failed: ${String(err)}`)
   }
@@ -293,7 +301,7 @@ async function handoff($: EngineInterface) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     sid = await $.session.id()
-    home = $.plugin.root.split('/.claude/')[0] ?? ''
+    await homeDir($)
     // The 60 s demo is for one chat only. Older versions saved it for every chat, so clear that.
     demo = false
     if ((await $.store.get('demo').catch(() => undefined)) === true) {

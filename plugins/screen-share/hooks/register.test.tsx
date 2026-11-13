@@ -9,6 +9,7 @@ const NAMED = 'From: Jane Doe <jane@x.com>'
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`screen-share hides private data on screen only while on (${surface})`, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const store: Record<string, unknown> = {}
     const statuses: (string | undefined)[] = []
     const seen: Record<string, unknown> = {}
@@ -161,6 +162,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`draws nothing of its own when switched off in /mods (${surface})`, { timeoutMs: 20000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     let switches = ''
     const statuses: (string | undefined)[] = []
     const seen: Record<string, unknown> = {}

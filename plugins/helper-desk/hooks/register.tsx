@@ -140,6 +140,14 @@ let seats = 0
 let nextHue = 0
 let tickN = 0
 let home = ''
+
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
 let sessionId = ''
 let off = false
 // "helper-desk:hidden": true in switches.json closes the pane and stops it opening by itself.
@@ -937,7 +945,7 @@ ${body}
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    home = $.plugin.root.split('/.claude/')[0] ?? ''
+    await homeDir($)
     sessionId = await $.session.id().catch(() => '')
     await $.command.register({ name: 'helpers', description: 'Show the Helper Desk: the task progress bar and one live card per subagent', immediate: true })
     await $.tool.register({

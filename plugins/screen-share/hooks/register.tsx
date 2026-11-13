@@ -19,6 +19,14 @@ const BAND_TEXT = ' Screen-share mode: emails, phones, amounts and names hidden 
 // Module variables reset on a reload; the mode itself lives in $.state and $.store.
 let sid = ''
 let home = ''
+
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
 // The bar glyph rows draw with now: light for the first frame after turning
 // on, then the full bar. A fade in of one step, 150 ms.
 let glyph = BAR
@@ -31,7 +39,7 @@ let off = false
 async function readSwitch($: EngineInterface) {
   let now = false
   try {
-    const path = `${$.plugin.root.split('/.claude/')[0] ?? ''}/.claude/mods/switches.json`
+    const path = `${await homeDir($)}/.claude/mods/switches.json`
     if (await $.fs.exists(path)) {
       const json = JSON.parse(String(await $.fs.read(path))) as Record<string, unknown>
       now = json[NAME] === false
@@ -121,7 +129,7 @@ export const register: Register = on => {
     })
     try {
       sid = await $.session.id()
-      home = $.plugin.root.split('/.claude/')[0] ?? ''
+      await homeDir($)
       await readSwitch($).catch(() => undefined)
       $.clock.every(3000, () => {
         void readSwitch($).catch(() => undefined)

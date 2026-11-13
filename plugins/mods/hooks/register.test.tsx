@@ -4,6 +4,7 @@ const props = { title: 'Mods', isFocused: false, bodyColumns: 60, placement: 'do
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`switches a mod off, and Show opens a side pane (${surface})`, { timeoutMs: 20000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const opened: string[] = []
     const find = (end: string) => Object.keys(files).find(k => k.endsWith(end))
@@ -75,6 +76,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`Shown/Hidden on Cache Clock flips its hidden key (${surface})`, { timeoutMs: 20000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const find = (end: string) => Object.keys(files).find(k => k.endsWith(end))
     on('session.start', async ($, e) => ({ cwd: e.cwd }) as never)
@@ -113,6 +115,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`Open on a pane mod writes the open request only while it is On and Shown (${surface})`, { timeoutMs: 20000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const find = (end: string) => Object.keys(files).find(k => k.endsWith(end))
     on('session.start', async ($, e) => ({ cwd: e.cwd }) as never)
@@ -194,6 +197,7 @@ const onDisk = (path: string) => Object.keys(disk).find(k => path.endsWith(k))
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`finds new mods by itself, and a mod without the switch gets a note (${surface})`, { timeoutMs: 20000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     on('session.start', async ($, e) => ({ cwd: e.cwd }) as never)
     on('session.id', async () => ({ value: 'sid-123' }) as never)
