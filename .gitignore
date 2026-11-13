@@ -147,3 +147,6 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Claude Code mods: runtime state and logs written while the mods run
+plugins/*/.claude/
