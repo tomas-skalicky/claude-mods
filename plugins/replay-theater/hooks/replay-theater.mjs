@@ -25,11 +25,18 @@ const HIDE_KEY = `${NAME}:hidden`;
 const POLL_MS = 3000;
 const sw = { off: false, hidden: false, sid: "" };
 
-const homeOf = ($) => $.plugin.root.split("/.claude/")[0] || "";
-const switchesPath = ($) => `${homeOf($)}/.claude/mods/switches.json`;
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+let home = "";
+async function homeOf($) {
+  if (!home) home = (await $.env.get("HOME")) || ($.plugin.root.includes("/.claude/") ? $.plugin.root.split("/.claude/")[0] : "");
+  return home;
+}
+const switchesPath = async ($) => `${await homeOf($)}/.claude/mods/switches.json`;
 
 async function readSwitches($) {
-  const path = switchesPath($);
+  const path = (await switchesPath($));
   if (!(await $.fs.exists(path))) return {};
   const json = JSON.parse(String(await $.fs.read(path)));
   return json && typeof json === "object" && !Array.isArray(json) ? json : {};
@@ -60,8 +67,8 @@ async function setHidden($, value) {
     const json = await readSwitches($).catch(() => ({}));
     if (value) json[HIDE_KEY] = true;
     else delete json[HIDE_KEY];
-    await $.process.run(["mkdir", "-p", `${homeOf($)}/.claude/mods`]);
-    await $.fs.write(switchesPath($), `${JSON.stringify(json, null, 2)}\n`);
+    await $.process.run(["mkdir", "-p", `${await homeOf($)}/.claude/mods`]);
+    await $.fs.write((await switchesPath($)), `${JSON.stringify(json, null, 2)}\n`);
   } catch { /* the in-memory flag still changes */ }
   sw.hidden = value;
 }
@@ -69,7 +76,7 @@ async function setHidden($, value) {
 // The /mods switchboard asks for the pane by leaving an empty file for this chat.
 async function checkOpen($) {
   if (!sw.sid) return;
-  const path = `${homeOf($)}/.claude/mods/.open-${NAME}-${sw.sid}`;
+  const path = `${await homeOf($)}/.claude/mods/.open-${NAME}-${sw.sid}`;
   try {
     if (!(await $.fs.exists(path))) return;
     await $.process.run(["rm", "-f", path]);

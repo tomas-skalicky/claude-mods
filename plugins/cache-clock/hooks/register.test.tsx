@@ -2,6 +2,7 @@ import { expect, mock, test } from 'claude-code/testing'
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`counts down, goes cold, offers a handoff on a big chat (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     // An older version saved the 60 s demo for every chat; a new chat must not use it.
     const store: Record<string, unknown> = { demo: true }
@@ -76,6 +77,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`clearing the hidden flag draws the clock again (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     let flag = JSON.stringify({ 'cache-clock:hidden': true })
     const isSwitches = (e: unknown) => (e as { path: string }).path.endsWith('/.claude/mods/switches.json')
@@ -132,6 +134,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`draws nothing of its own when switched off in /mods (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     let switches = ''
     const isSwitches = (e: unknown) => (e as { path: string }).path.endsWith('/.claude/mods/switches.json')
     on('session.start', async ($, e) => ({ cwd: e.cwd }) as never)
@@ -170,6 +173,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`keep warm: the button turns it on, a ping fires before expiry, a prompt stops it (${surface})`, { timeoutMs: 60000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const toasts: string[] = []
     const forks: string[] = []
@@ -252,6 +256,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`keep warm stops by itself after 30 pings, and says when the cache had gone cold (${surface})`, { timeoutMs: 120000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const store: Record<string, unknown> = {}
     const toasts: string[] = []
@@ -334,6 +339,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`keep warm stops when Cache Clock is switched off in /mods (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     let switches = ''
     const toasts: string[] = []
     let forks = 0

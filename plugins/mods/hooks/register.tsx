@@ -39,8 +39,15 @@ let cache: { at: number; rows: Row[] } | null = null
 
 const NOT_SWITCHABLE = 'Not switchable yet. Ask Claude: add the /mods switch to this mod.'
 
-const homeOf = ($: EngineInterface) => $.plugin.root.split('/.claude/')[0] ?? ''
-const switchesPath = ($: EngineInterface) => `${homeOf($)}/.claude/mods/switches.json`
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+let home = ''
+async function homeOf($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
+const switchesPath = async ($: EngineInterface) => `${await homeOf($)}/.claude/mods/switches.json`
 
 function cut(s: string, n: number) {
   if (n <= 0) return ''
@@ -49,7 +56,7 @@ function cut(s: string, n: number) {
 
 async function log($: EngineInterface, where: string, err: unknown) {
   try {
-    const dir = `${homeOf($)}/.claude/mods-logs`
+    const dir = `${await homeOf($)}/.claude/mods-logs`
     const file = `${dir}/mods.log`
     await $.process.run(['mkdir', '-p', dir])
     let old = ''
@@ -68,7 +75,7 @@ async function log($: EngineInterface, where: string, err: unknown) {
 
 async function readRaw($: EngineInterface) {
   try {
-    const path = switchesPath($)
+    const path = (await switchesPath($))
     if (!(await $.fs.exists(path))) return ''
     return String(await $.fs.read(path))
   } catch {
@@ -93,9 +100,9 @@ const isOff = (json: Record<string, unknown>, name: string) => json[name] === fa
 const isHidden = (json: Record<string, unknown>, name: string) => json[`${name}:hidden`] === true
 
 async function save($: EngineInterface, json: Record<string, unknown>) {
-  await $.process.run(['mkdir', '-p', `${homeOf($)}/.claude/mods`])
+  await $.process.run(['mkdir', '-p', `${await homeOf($)}/.claude/mods`])
   const text = `${JSON.stringify(json, null, 2)}\n`
-  await $.fs.write(switchesPath($), text)
+  await $.fs.write((await switchesPath($)), text)
   lastRaw = text
 }
 
@@ -122,7 +129,7 @@ async function flipHidden($: EngineInterface, name: string) {
 
 async function askOpen($: EngineInterface, name: string) {
   if (!sid) throw new Error('no session id')
-  await $.fs.write(`${homeOf($)}/.claude/mods/.open-${name}-${sid}`, '')
+  await $.fs.write(`${await homeOf($)}/.claude/mods/.open-${name}-${sid}`, '')
 }
 
 async function readText($: EngineInterface, path: string) {
@@ -166,7 +173,7 @@ async function envDirs($: EngineInterface) {
     return []
   }
   if (!raw) return []
-  const home = homeOf($)
+  const home = await homeOf($)
   return raw
     .split(':')
     .map(x => x.trim())
@@ -236,7 +243,7 @@ async function inspect($: EngineInterface, dir: string, chatOnly: boolean): Prom
 
 // Known mods first in their old order, then new ones A to Z, then this chat's own.
 async function scan($: EngineInterface): Promise<Row[]> {
-  const home = homeOf($)
+  const home = await homeOf($)
   const found = new Map<string, Row>()
   const dirs: [string, boolean][] = []
   for (const d of await listDirs($, `${home}/.claude/mods`)) dirs.push([d, false])

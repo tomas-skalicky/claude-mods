@@ -103,6 +103,7 @@ const props = (bodyColumns = 60) =>
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`two helpers get live cards, then both are done (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { agents, statuses, opened, clock } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     // A plain signature: the connector-typed one is too deep for tsc.
@@ -152,6 +153,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`two helpers get two body colours, and only running pets move (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { clock } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await $.agent.spawn({ tool_use_id: 's1', prompt: 'x', description: 'Build the landing page', subagentType: 'general-purpose' } as never)
@@ -201,6 +204,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`a new helper never takes a running helper's colour (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { clock, agents } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await $.agent.spawn({ tool_use_id: 's1', prompt: 'x', description: 'One', subagentType: 'general-purpose' } as never)
@@ -226,6 +231,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`connector steps are named from the server or the tool names, never a raw id (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { clock } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     const callTool = $.tool.call as unknown as (input: unknown) => Promise<unknown>
@@ -264,6 +271,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`pressing a card's toggle shows its full step list (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { clock } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     const callTool = $.tool.call as unknown as (input: unknown) => Promise<unknown>
@@ -303,6 +312,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`switches.json false: the pane draws nothing of its own (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const { opened, closed, clock } = rig(on, files)
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -334,6 +345,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`each card has one thick sparkle bar (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { clock } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     await $.agent.spawn({ tool_use_id: 's1', prompt: 'x', description: 'Build the landing page', subagentType: 'general-purpose' } as never)
@@ -351,6 +364,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`Hide in the pane writes the shared flag and closes it (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const { opened, closed, clock } = rig(on, files)
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -365,6 +380,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`hidden, it does not open by itself; cleared, Show opens it (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = { '*/.claude/mods/switches.json': JSON.stringify({ 'helper-desk:hidden': true }) }
     const { opened, clock } = rig(on, files)
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -381,6 +398,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`the plan tool writes the plan file and draws "2 of 4" (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const { clock, ran } = rig(on, files)
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -433,6 +452,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`a TodoWrite call on the main chat is mirrored into the plan (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const { clock } = rig(on, files)
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -457,6 +478,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`a step finishing raises a toast, and a finished plan holds 20 s then hides (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const { clock, toasts } = rig(on, {})
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
     const callTool = $.tool.call as unknown as (input: unknown) => Promise<unknown>
@@ -485,6 +508,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`off or hidden: the band draws nothing of its own (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const files: Record<string, string> = {}
     const { clock } = rig(on, files)
     await $.session.start({ source: 'startup', cwd: '/Users/test/vault', surface, isInteractive: true } as never)
@@ -508,6 +533,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
 }
 
 test('the plan tool sits in front, and work without a plan gets one nudge', { timeoutMs: 30000 }, async ($, on) => {
+
+  on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
   specs = []
   const files: Record<string, string> = {}
   const { clock } = rig(on, files)

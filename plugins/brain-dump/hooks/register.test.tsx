@@ -23,6 +23,7 @@ const longDump = `${filler} ${filler}`.split(/\s+/).slice(0, 150).join(' ')
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`shapes a brain dump, sends as is, and skips short or shaped prompts (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const store: Record<string, unknown> = {}
     const files: Record<string, string> = {}
     let answer = 'Shape it'
@@ -118,6 +119,7 @@ for (const surface of ['desktop', 'terminal'] as const) {
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`does nothing when switched off in /mods (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     let switches = ''
     let asks = 0
     const passed: string[] = []
@@ -211,6 +213,7 @@ const logOf = (r: Rig) => Object.entries(r.files).find(([k]) => k.endsWith('/.cl
 
 for (const surface of ['desktop', 'terminal'] as const) {
   test(`zero questions goes straight to the brief (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const r = rig(on, ['{"questions":[]}', BRIEF], {})
     await $.session.start({ source: 'startup', cwd: '/tmp', surface, isInteractive: true } as never)
     const out = await $.prompt.submit({ text: longDump, origin: { kind: 'composer' }, wait: false } as never)
@@ -226,6 +229,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`two questions are asked and their answers reach the brief prompt (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const q1 = 'Is the summary for Ben only, or the whole team?'
     const q2 = 'When do you need it?'
     const q3 = 'Which Stripe export should I use?'
@@ -261,6 +266,8 @@ for (const surface of ['desktop', 'terminal'] as const) {
   })
 
   test(`bad JSON from the gap check still makes a brief (${surface})`, { timeoutMs: 30000 }, async ($, on) => {
+
+    on('env.get', { name: 'HOME' }, async () => ({ value: '/Users/tester' }) as never)
     const r = rig(on, ['Sure! I think the dump is mostly clear, maybe ask about the deadline.', BRIEF], {})
     await $.session.start({ source: 'startup', cwd: '/tmp', surface, isInteractive: true } as never)
     const out = await $.prompt.submit({ text: longDump, origin: { kind: 'composer' }, wait: false } as never)

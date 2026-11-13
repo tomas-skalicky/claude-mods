@@ -33,6 +33,14 @@ const LABELS = [
 // Module variables reset on a reload; the band itself lives in $.state.
 let sid = ''
 let home = ''
+
+// The home folder, from $HOME. Cutting this mod's own path at /.claude/ is only the
+// fallback: a mod loaded straight from a marketplace folder outside ~/.claude has no
+// /.claude/ in its path, and then the cut would give the mod's own folder.
+async function homeDir($: EngineInterface) {
+  if (!home) home = (await $.env.get('HOME')) || ($.plugin.root.includes('/.claude/') ? $.plugin.root.split('/.claude/')[0] : '')
+  return home
+}
 let petDir = ''
 let busy = false
 // The model asked for a refresh in the middle of its turn: it starts when the turn ends,
@@ -57,10 +65,10 @@ let hidden = false
 // The offer was asked for (Show or /refresh): it stays whatever the token count.
 let forced = false
 
-const switchesPath = ($: EngineInterface) => `${$.plugin.root.split('/.claude/')[0] ?? ''}/.claude/mods/switches.json`
+const switchesPath = async ($: EngineInterface) => `${await homeDir($)}/.claude/mods/switches.json`
 
 async function readSwitches($: EngineInterface): Promise<Record<string, unknown>> {
-  const path = switchesPath($)
+  const path = (await switchesPath($))
   if (!(await $.fs.exists(path))) return {}
   const json = JSON.parse(String(await $.fs.read(path))) as unknown
   return json && typeof json === 'object' && !Array.isArray(json) ? (json as Record<string, unknown>) : {}
@@ -102,7 +110,7 @@ async function setHidden($: EngineInterface, value: boolean) {
     if (value) json[HIDE_KEY] = true
     else delete json[HIDE_KEY]
     await $.process.run(['mkdir', '-p', `${home}/.claude/mods`])
-    await $.fs.write(switchesPath($), `${JSON.stringify(json, null, 2)}\n`)
+    await $.fs.write((await switchesPath($)), `${JSON.stringify(json, null, 2)}\n`)
   } catch (err) {
     await log($, `save hidden failed: ${String(err)}`)
   }
@@ -451,8 +459,25 @@ async function note($: EngineInterface, text: string) {
 
 async function copy($: EngineInterface) {
   if (!handoffText) return
-  const r = await $.process.run(['pbcopy'], { stdin: handoffText })
-  await note($, r.exitCode === 0 ? 'Copied. Paste it into a new chat with ⌘V.' : 'Copy failed. Use Open file instead.')
+  // xclip first (Linux, X11). Its output goes to /dev/null because xclip stays in the
+  // background to hold the clipboard, and an open output pipe would make the run wait.
+  // pbcopy is the fallback, so the button still works on a Mac.
+  const tries: [string[], string][] = [
+    [['sh', '-c', 'xclip -selection clipboard >/dev/null 2>&1'], 'Ctrl+V'],
+    [['pbcopy'], '⌘V'],
+  ]
+  for (const [argv, paste] of tries) {
+    try {
+      const r = await $.process.run(argv, { stdin: handoffText })
+      if (r.exitCode === 0) {
+        await note($, `Copied. Paste it into a new chat with ${paste}.`)
+        return
+      }
+    } catch {
+      // Not on this machine: try the next one.
+    }
+  }
+  await note($, 'Copy failed. Install xclip, or use Open file instead.')
 }
 
 async function petAlive($: EngineInterface) {
@@ -556,7 +581,7 @@ function bar(progress: number, status: Step['status']) {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     sid = await $.session.id()
-    home = $.plugin.root.split('/.claude/')[0] ?? ''
+    await homeDir($)
     petDir = `${home}/.claude/pet`
     await poll($).catch(() => undefined)
     $.clock.every(3000, () => {
